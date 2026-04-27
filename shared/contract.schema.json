@@ -1,0 +1,78 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "NEXUS Task Contract",
+  "description": "The exact payload Brain produces and Hands consumes",
+  "type": "object",
+  "required": ["session_id", "timestamp", "trigger", "tasks", "confidence_score", "requires_approval"],
+  "properties": {
+    "session_id": {
+      "type": "string",
+      "description": "UUID for this execution session, used for logging"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "trigger": {
+      "type": "string",
+      "description": "The raw user input that caused this execution",
+      "example": "I am late"
+    },
+    "context_snapshot": {
+      "type": "object",
+      "description": "What the brain knew at time of decision",
+      "properties": {
+        "memory_excerpt": { "type": "string" },
+        "soul_constraints_applied": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["task_id", "node", "action", "payload", "priority"],
+        "properties": {
+          "task_id": { "type": "string", "description": "UUID for this specific task" },
+          "node": {
+            "type": "string",
+            "enum": ["comms", "calendar", "finance", "geo", "system"]
+          },
+          "action": { "type": "string" },
+          "payload": { "type": "object" },
+          "priority": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "1=critical, 5=low. All tasks still fire in parallel."
+          },
+          "estimated_cost": {
+            "type": "number",
+            "description": "Estimated monetary cost in INR if applicable, 0 if free"
+          },
+          "rollback_action": {
+            "type": "object",
+            "description": "Optional: what to do if this task fails"
+          }
+        }
+      }
+    },
+    "confidence_score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "requires_approval": {
+      "type": "boolean",
+      "description": "If true, Hands must pause and prompt user before executing"
+    },
+    "approval_reason": {
+      "type": "string",
+      "description": "Required if requires_approval is true"
+    },
+    "total_estimated_cost": {
+      "type": "number",
+      "description": "Sum of all task estimated_cost values"
+    }
+  }
+}

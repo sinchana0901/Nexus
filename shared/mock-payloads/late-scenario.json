@@ -1,0 +1,55 @@
+{
+  "session_id": "uuid-a1b2c3d4",
+  "timestamp": "2025-05-03T18:35:00+05:30",
+  "trigger": "I am late",
+  "context_snapshot": {
+    "memory_excerpt": "User has weekly sync at 19:00 every Thursday with Rahul. Usual coffee order is cold brew from Third Wave.",
+    "soul_constraints_applied": ["no_mass_message_without_approval", "cost_under_2000"]
+  },
+  "tasks": [
+    {
+      "task_id": "uuid-t001",
+      "node": "comms",
+      "action": "send_slack",
+      "payload": {
+        "channel": "#rahul-dm",
+        "message": "Hey, running about 20 minutes late to our sync. Starting at 19:20 instead."
+      },
+      "priority": 1,
+      "estimated_cost": 0,
+      "rollback_action": null
+    },
+    {
+      "task_id": "uuid-t002",
+      "node": "calendar",
+      "action": "reschedule_event",
+      "payload": {
+        "event_id": "google-cal-event-123",
+        "original_time": "19:00",
+        "new_time": "19:20",
+        "notify_attendees": true
+      },
+      "priority": 1,
+      "estimated_cost": 0,
+      "rollback_action": {
+        "action": "reschedule_event",
+        "payload": { "event_id": "google-cal-event-123", "new_time": "19:00" }
+      }
+    },
+    {
+      "task_id": "uuid-t003",
+      "node": "geo",
+      "action": "get_eta",
+      "payload": {
+        "destination": "last_known_meeting_location",
+        "mode": "driving"
+      },
+      "priority": 2,
+      "estimated_cost": 0,
+      "rollback_action": null
+    }
+  ],
+  "confidence_score": 91,
+  "requires_approval": false,
+  "total_estimated_cost": 0
+}
