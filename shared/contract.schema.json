@@ -1,31 +1,55 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "NEXUS Task Contract",
-  "description": "The exact payload Brain produces and Hands consumes",
+  "title": "NEXUS Hybrid Task Contract v2",
   "type": "object",
-  "required": ["session_id", "timestamp", "trigger", "tasks", "confidence_score", "requires_approval"],
+  "required": [
+    "session_id", "timestamp", "trigger",
+    "routing_metadata", "tasks",
+    "confidence_score", "requires_approval"
+  ],
   "properties": {
-    "session_id": {
-      "type": "string",
-      "description": "UUID for this execution session, used for logging"
-    },
-    "timestamp": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "trigger": {
-      "type": "string",
-      "description": "The raw user input that caused this execution",
-      "example": "I am late"
-    },
-    "context_snapshot": {
+    "session_id": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "trigger": { "type": "string" },
+
+    "routing_metadata": {
       "type": "object",
-      "description": "What the brain knew at time of decision",
+      "required": ["sentinel_decision", "inference_used", "sensitive_entities_found"],
       "properties": {
-        "memory_excerpt": { "type": "string" },
-        "soul_constraints_applied": { "type": "array", "items": { "type": "string" } }
+        "sentinel_decision": {
+          "type": "string",
+          "enum": ["groq", "local"],
+          "description": "What Layer 1 decided"
+        },
+        "inference_used": {
+          "type": "string",
+          "enum": ["groq", "ollama", "cache"],
+          "description": "What Layer 2 actually used"
+        },
+        "sensitive_entities_found": {
+          "type": "integer",
+          "description": "How many sensitive entities Sentinel detected"
+        },
+        "anonymization_applied": { "type": "boolean" },
+        "sentinel_latency_ms": { "type": "integer" },
+        "executor_latency_ms": { "type": "integer" }
       }
     },
+
+    "context_snapshot": {
+      "type": "object",
+      "properties": {
+        "memory_sections_used": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "soul_constraints_applied": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
     "tasks": {
       "type": "array",
       "minItems": 1,
@@ -33,46 +57,23 @@
         "type": "object",
         "required": ["task_id", "node", "action", "payload", "priority"],
         "properties": {
-          "task_id": { "type": "string", "description": "UUID for this specific task" },
+          "task_id": { "type": "string" },
           "node": {
             "type": "string",
             "enum": ["comms", "calendar", "finance", "geo", "system"]
           },
           "action": { "type": "string" },
           "payload": { "type": "object" },
-          "priority": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 5,
-            "description": "1=critical, 5=low. All tasks still fire in parallel."
-          },
-          "estimated_cost": {
-            "type": "number",
-            "description": "Estimated monetary cost in INR if applicable, 0 if free"
-          },
-          "rollback_action": {
-            "type": "object",
-            "description": "Optional: what to do if this task fails"
-          }
+          "priority": { "type": "integer", "minimum": 1, "maximum": 5 },
+          "estimated_cost": { "type": "number" },
+          "rollback_action": { "type": ["object", "null"] }
         }
       }
     },
-    "confidence_score": {
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 100
-    },
-    "requires_approval": {
-      "type": "boolean",
-      "description": "If true, Hands must pause and prompt user before executing"
-    },
-    "approval_reason": {
-      "type": "string",
-      "description": "Required if requires_approval is true"
-    },
-    "total_estimated_cost": {
-      "type": "number",
-      "description": "Sum of all task estimated_cost values"
-    }
+
+    "confidence_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "requires_approval": { "type": "boolean" },
+    "approval_reason": { "type": "string" },
+    "total_estimated_cost": { "type": "number" }
   }
 }

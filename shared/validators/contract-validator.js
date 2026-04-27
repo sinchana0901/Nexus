@@ -3,7 +3,8 @@ const addFormats = require('ajv-formats');
 const schema = require('../contract.schema.json');
 const { v4: uuidv4 } = require('uuid');
 
-const ajv = new Ajv({ allErrors: true });
+// We set strict: false so it ignores documentation keywords like "example"
+const ajv = new Ajv({ allErrors: true, strict: false });
 addFormats(ajv);
 const validate = ajv.compile(schema);
 
