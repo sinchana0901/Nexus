@@ -14,11 +14,14 @@ IMPORTANT: The input uses coded placeholders (PERSON_A, LOCATION_A etc.) — use
 ## REQUEST
 "{{USER_INPUT}}"
 
+RULES:
+- The "node" field MUST be exactly ONE of these strings: "comms", "calendar", "geo", or "finance". Do not use the "|" character. Do not combine them.
+
 You MUST return exactly this JSON structure and nothing else:
 {
   "tasks": [
     {
-      "node": "comms|calendar|geo|finance",
+      "node": "finance",
       "action": "action_name",
       "payload": { "key": "value" },
       "priority": 1,

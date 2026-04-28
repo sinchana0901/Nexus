@@ -20,10 +20,13 @@
   },
   "homepage": "https://github.com/sinchana0901/Nexus#readme",
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
+    "axios": "^1.15.2",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "googleapis": "^171.4.0",
     "groq-sdk": "^1.1.2",
     "uuid": "^14.0.0"
   }

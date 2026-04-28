@@ -19,9 +19,11 @@ async function runExecutor(sentinelResult, userInput) {
     inferenceResult = await runCloudInference(anonymizedInput, anonymizedMemory);
   }
 
-  const cleaned = stripMarkdownFences(inferenceResult.raw);
-
-  let contract;
+  
+  let cleaned = stripMarkdownFences(inferenceResult.raw);
+  
+  // 🧹 THE JANITOR: If the 8B model mashes nodes like "comms|finance", force it to just take the first one.
+  cleaned = cleaned.replace(/"node"\s*:\s*"([a-z]+)\|[a-z|]+"/g, '"node": "$1"');
   try {
     const parsed = JSON.parse(cleaned);
     // Deanonymize if Groq was used
