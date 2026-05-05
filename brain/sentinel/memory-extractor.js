@@ -10,7 +10,8 @@ const SECTION_KEYWORDS = {
 };
 
 function extractRelevantMemory(userInput, memoryKeys = [], memoryFilePath) {
-  const memoryPath = path.resolve(process.cwd(), memoryFilePath || 'brain/memory/MEMORY.md');
+  const memoryFile = memoryFilePath || process.env.MEMORY_FILE_PATH?.trim() || path.join(__dirname, '../memory/MEMORY.md');
+  const memoryPath = path.isAbsolute(memoryFile) ? memoryFile : path.resolve(process.cwd(), memoryFile);
   const memory = fs.readFileSync(memoryPath, 'utf8');
   const inputLower = userInput.toLowerCase();
   

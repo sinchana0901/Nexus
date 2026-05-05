@@ -1,10 +1,23 @@
 const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
-const MASTER_PROMPT = fs.readFileSync('./brain/prompts/master.prompt.txt', 'utf8');
+const MASTER_PROMPT = fs.readFileSync(path.join(__dirname, '../prompts/master.prompt.txt'), 'utf8');
+
+function getSoulFilePath() {
+  const envPath = process.env.SOUL_FILE_PATH?.trim();
+  if (envPath) {
+    return path.isAbsolute(envPath) ? envPath : path.resolve(process.cwd(), envPath);
+  }
+  return path.join(__dirname, '../memory/SOUL.md');
+}
 
 function buildPrompt(userInput, memoryContext) {
-  const soul = fs.readFileSync(process.env.SOUL_FILE_PATH, 'utf8');
+  const soulFile = getSoulFilePath();
+  if (!fs.existsSync(soulFile)) {
+    throw new Error(`Missing soul file at ${soulFile}. Set SOUL_FILE_PATH or create brain/memory/SOUL.md.`);
+  }
+  const soul = fs.readFileSync(soulFile, 'utf8');
   return MASTER_PROMPT
     .replace('{{MEMORY_INJECTION}}', memoryContext)
     .replace('{{SOUL_INJECTION}}', soul)
@@ -18,20 +31,31 @@ async function runLocalInference(userInput, memoryContext) {
 
   console.log('🦙 Running local Ollama inference...');
 
-  const response = await fetch(`${process.env.OLLAMA_BASE_URL}/api/generate`, {
+  const ollamaBaseUrl = process.env.OLLAMA_BASE_URL?.trim() || 'http://localhost:11434';
+  const model = process.env.OLLAMA_EXECUTOR_MODEL?.trim() || 'phi3:mini';
+  console.log(`🧠 Local inference using model: ${model}`);
+  const response = await fetch(`${ollamaBaseUrl}/api/generate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: process.env.OLLAMA_EXECUTOR_MODEL || 'llama3.1:8b',
+      model,
       prompt,
       stream: false,
       format: 'json',
       options: { temperature: 0.1, num_predict: 1500 }
     }),
-    signal: AbortSignal.timeout(parseInt(process.env.OLLAMA_EXECUTOR_TIMEOUT_MS) || 60000)
+    signal: AbortSignal.timeout(parseInt(process.env.OLLAMA_EXECUTOR_TIMEOUT_MS) || 120000)
   });
 
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => 'unable to read error body');
+    throw new Error(`Local inference request failed: ${response.status} ${response.statusText} - ${errorText}`);
+  }
+
   const data = await response.json();
+  if (!data || typeof data.response !== 'string') {
+    throw new Error('Local inference returned an invalid response payload.');
+  }
   const latency = Date.now() - start;
   console.log(`🦙 Ollama responded in ${latency}ms`);
 

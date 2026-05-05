@@ -5,6 +5,9 @@ const { validateContract } = require('../../shared/validators/contract-validator
 const { v4: uuidv4 } = require('uuid');
 
 function stripMarkdownFences(text) {
+  if (typeof text !== 'string') {
+    throw new Error('Inference did not return a valid raw response string.');
+  }
   return text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
 }
 

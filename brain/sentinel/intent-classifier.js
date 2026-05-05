@@ -14,13 +14,13 @@ async function classifyIntent(userInput) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: process.env.SENTINEL_MODEL || 'phi3:mini',
+      model: 'phi3:mini',
       prompt: prompt,
       stream: false,
       format: 'json',
       options: { temperature: 0.05, num_predict: 300 }
     }),
-    signal: AbortSignal.timeout(parseInt(process.env.SENTINEL_TIMEOUT_MS) || 5000)
+    signal: AbortSignal.timeout(parseInt(process.env.SENTINEL_TIMEOUT_MS) || 120000)
   });
 
   if (!response.ok) throw new Error(`Sentinel Ollama error: ${response.status}`);

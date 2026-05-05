@@ -13,7 +13,7 @@ async function runSentinel(userInput) {
   const relevantMemory = extractRelevantMemory(
     userInput,
     classification.memory_keys,
-    process.env.MEMORY_FILE_PATH
+    './brain/memory/MEMORY.md'
   );
 
   const anonymizedInput = classification.routing_decision === 'groq'

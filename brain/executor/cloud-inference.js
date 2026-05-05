@@ -1,11 +1,24 @@
 const fs = require('fs');
+const path = require('path');
 const Groq = require('groq-sdk');
 require('dotenv').config();
 
-const ANONYMIZED_PROMPT = fs.readFileSync('./brain/prompts/master-anonymized.prompt.txt', 'utf8');
+const ANONYMIZED_PROMPT = fs.readFileSync(path.join(__dirname, '../prompts/master-anonymized.prompt.txt'), 'utf8');
+
+function getSoulFilePath() {
+  const envPath = process.env.SOUL_FILE_PATH?.trim();
+  if (envPath) {
+    return path.isAbsolute(envPath) ? envPath : path.resolve(process.cwd(), envPath);
+  }
+  return path.join(__dirname, '../memory/SOUL.md');
+}
 
 function buildAnonymizedPrompt(anonymizedInput, anonymizedMemory) {
-  const soul = fs.readFileSync(process.env.SOUL_FILE_PATH, 'utf8');
+  const soulFile = getSoulFilePath();
+  if (!fs.existsSync(soulFile)) {
+    throw new Error(`Missing soul file at ${soulFile}. Set SOUL_FILE_PATH or create brain/memory/SOUL.md.`);
+  }
+  const soul = fs.readFileSync(soulFile, 'utf8');
   return ANONYMIZED_PROMPT
     .replace('{{MEMORY_INJECTION}}', anonymizedMemory)
     .replace('{{SOUL_INJECTION}}', soul)
@@ -31,8 +44,13 @@ async function runCloudInference(anonymizedInput, anonymizedMemory) {
   const latency = Date.now() - start;
   console.log(`☁️  Groq responded in ${latency}ms`);
 
+  const raw = completion?.choices?.[0]?.message?.content;
+  if (typeof raw !== 'string') {
+    throw new Error('Cloud inference returned an invalid response payload.');
+  }
+
   return {
-    raw: completion.choices[0].message.content,
+    raw,
     latency,
     source: 'groq'
   };

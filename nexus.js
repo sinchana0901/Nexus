@@ -30,6 +30,34 @@ async function nexus(userInput) {
     
     // Step 3: Hands Execute
     console.log('\n🖐️  Hands executing swarm...\n');
+    console.log("🖐️ Hands executing swarm...");
+
+// ==========================================
+// 🚀 REAL-WORLD MCP SWARM INJECTION 
+// ==========================================
+async function runSwarmAction() {
+    try {
+        // 1. Load the MCP bridge dynamically (Note the updated path!)
+        const mcpBridge = await import('./brain/mcp-client.mjs');
+        
+        // 2. Connect to the Hands
+        const { tools } = await mcpBridge.connectToMCP();
+        
+        // 3. NEW TEST: Let's trigger the actual Food Automator!
+        console.log("🤖 Triggering the Zomato Automator Tool...");
+        const result = await mcpBridge.executeTool('order_food', { 
+            dishName: 'dum biryani' 
+        });
+        
+        console.log("✅ Result from Hands:", result);
+    } catch (error) {
+        console.error("🔥 Swarm execution failed:", error);
+    }
+}
+
+// Call the test function
+runSwarmAction();
+// ==========================================
     await axios.post(`${HANDS_URL}/execute`, { contract });
     // The visual output will primarily be handled by the Hands server's Silent Room
     
