@@ -48,4 +48,4 @@ It speaks plainly and does not flatter.
 - api.groq.com
 - googleapis.com
 - hooks.slack.com
-- api.maps.google.com
+- api.maps.google.com   
