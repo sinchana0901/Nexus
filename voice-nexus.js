@@ -118,7 +118,7 @@ app.post('/api/command', async (req, res) => {
         // ── 4. Handle narrative + tasks (conversational + action) ──
         // Speak the narrative, then execute the tasks
         if (contract.narrative_response) {
-            speak(contract.narrative_response);
+            await speak(contract.narrative_response);
         }
 
         // ── 5. Requires Approval? ──────────────────────────
@@ -169,6 +169,12 @@ app.post('/api/command', async (req, res) => {
                         if (taskResult.node === 'google' && taskResult.result.action === 'get_schedule' && taskResult.result.summary) {
                             console.log(`[VOICE] Reading out schedule: ${taskResult.result.summary}`);
                             speak(taskResult.result.summary);
+                        }
+                        // Read out event creation
+                        if (taskResult.node === 'google' && taskResult.result.action === 'create_event' && taskResult.result.status === 'created') {
+                            const eventMsg = `Successfully scheduled ${taskResult.result.title}.`;
+                            console.log(`[VOICE] Reading out event creation: ${eventMsg}`);
+                            speak(eventMsg);
                         }
                         // Read out ETA
                         if (taskResult.node === 'geo' && taskResult.result.action === 'get_eta') {
@@ -243,6 +249,9 @@ app.post('/api/approve', async (req, res) => {
                 if (taskResult.status === 'success' && taskResult.result) {
                     if (taskResult.node === 'google' && taskResult.result.action === 'get_schedule' && taskResult.result.summary) {
                         speak(taskResult.result.summary);
+                    }
+                    if (taskResult.node === 'google' && taskResult.result.action === 'create_event' && taskResult.result.status === 'created') {
+                        speak(`Successfully scheduled ${taskResult.result.title}.`);
                     }
                     if (taskResult.node === 'geo' && taskResult.result.action === 'get_eta') {
                         speak(`The estimated travel time is ${taskResult.result.eta_minutes}.`);

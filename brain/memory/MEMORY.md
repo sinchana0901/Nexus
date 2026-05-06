@@ -26,7 +26,7 @@
 
 ### Sinchana Jeppu
 - Role: Development partner, NEXUS co-builder
-- Contact: sinchanajeppu@gmail.com/ +91-8971542999
+- Contact: sinchanaaajeppu23@yahoo.com | +91-8971234566
 - Collaboration pattern: Evening sessions, usually 20:00–23:00
 - Notes: Handles Hands architecture, prefers detailed handoff notes
 

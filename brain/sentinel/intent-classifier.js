@@ -13,7 +13,7 @@ async function classifyIntent(userInput) {
   let classification;
   try {
     const ollamaBaseUrl = process.env.OLLAMA_BASE_URL?.trim() || 'http://localhost:11434';
-    const model = process.env.OLLAMA_SENTINEL_MODEL?.trim() || 'phi3:mini';
+    const model = process.env.SENTINEL_MODEL?.trim() || 'llama3.2:1b';
     
     // Demonstrate local Ollama for PII detection
     const response = await fetch(`${ollamaBaseUrl}/api/generate`, {

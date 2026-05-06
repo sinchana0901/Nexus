@@ -1,4 +1,4 @@
-const { runLocalInference } = require('./local-inference');
+const { runLocalInference, runLocalIntrospectiveInference } = require('./local-inference');
 const { runCloudInference } = require('./cloud-inference');
 const { deanonymize } = require('../sentinel/deanonymizer');
 const { validateContract } = require('../../shared/validators/contract-validator');
@@ -16,11 +16,13 @@ async function runExecutor(sentinelResult, userInput) {
 
   let inferenceResult;
 
-  // ALWAYS use Groq (cloud) for contract generation.
-  // Ollama is too slow and produces unreliable contracts.
-  // The anonymizer has already stripped PII from the input.
-  console.log('⚡ Forcing Groq (cloud) inference for contract generation...');
-  inferenceResult = await runCloudInference(anonymizedInput, anonymizedMemory);
+  if (classification.intent_class === 'introspective') {
+    console.log('⚡ Using direct Introspective routing (local memory, strictly local inference)...');
+    inferenceResult = await runLocalIntrospectiveInference(userInput, relevantMemory);
+  } else {
+    console.log('⚡ Forcing Groq (cloud) inference for contract generation...');
+    inferenceResult = await runCloudInference(anonymizedInput, anonymizedMemory);
+  }
 
   
   let cleaned = stripMarkdownFences(inferenceResult.raw);
@@ -31,9 +33,22 @@ async function runExecutor(sentinelResult, userInput) {
   let contract;
   try {
     const parsed = JSON.parse(cleaned);
-    // Deanonymize: restore real names from placeholders
+    const originalNarrative = parsed.narrative_response; // Save the anonymized narrative for voice playback
+    
+    console.log(`\n[EXECUTOR] ☁️  Raw Cloud Response (Anonymized):`);
+    console.log(JSON.stringify(parsed, null, 2));
+
+    // Deanonymize: restore real names from placeholders for execution
     const contractString = deanonymize(JSON.stringify(parsed), reverseMap);
     contract = JSON.parse(contractString);
+    
+    console.log(`\n[EXECUTOR] 🔓 Deanonymized Payload (Local Execution):`);
+    console.log(JSON.stringify(contract.tasks, null, 2));
+
+    // Restore the anonymized narrative so the user hears "PERSON_A" to prove privacy
+    if (originalNarrative) {
+      contract.narrative_response = originalNarrative;
+    }
   } catch (err) {
     throw new Error(`Contract parse failed: ${err.message} | Raw: ${cleaned.substring(0, 200)}`);
   }
@@ -61,6 +76,7 @@ async function runExecutor(sentinelResult, userInput) {
   }
 
   // Validate
+  console.log('DEBUG routing_metadata:', contract.routing_metadata);
   const validation = validateContract(contract);
   if (!validation.valid) {
     console.warn('\n⚠️  SCHEMA VIOLATION DETECTED');

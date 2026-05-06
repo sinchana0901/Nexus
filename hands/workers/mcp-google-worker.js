@@ -118,13 +118,23 @@ async function createEvent(payload) {
     throw new Error(`create_event requires payload.start and payload.end (ISO strings). Received payload: ${JSON.stringify(payload)}`);
   }
 
-  // The LLM often mistakenly appends 'Z' (UTC) to times. 
-  // We strip any existing timezone and explicitly force +05:30 (IST).
-  const cleanStart = start.replace(/Z$/, '').replace(/[\+\-]\d{2}:\d{2}$/, '');
-  const cleanEnd = end.replace(/Z$/, '').replace(/[\+\-]\d{2}:\d{2}$/, '');
+  // Ensure start and end are strictly valid dates
+  const startDate = new Date(start);
+  const endDate = new Date(end);
   
-  const finalStart = `${cleanStart}+05:30`;
-  const finalEnd = `${cleanEnd}+05:30`;
+  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+    throw new Error(`Invalid start or end date format received from LLM: start=${start}, end=${end}`);
+  }
+
+  // Preserve the LLM's intended local time without shifting to UTC
+  let finalStart = start;
+  let finalEnd = end;
+  
+  if (finalStart.endsWith('Z')) finalStart = finalStart.replace('Z', '+05:30');
+  else if (!finalStart.match(/[\+\-]\d{2}:\d{2}$/)) finalStart += '+05:30';
+  
+  if (finalEnd.endsWith('Z')) finalEnd = finalEnd.replace('Z', '+05:30');
+  else if (!finalEnd.match(/[\+\-]\d{2}:\d{2}$/)) finalEnd += '+05:30';
 
   console.error(`[GOOGLE] 📅 Creating event: "${title}" from ${finalStart} to ${finalEnd}`);
 

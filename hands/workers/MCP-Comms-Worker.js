@@ -177,6 +177,7 @@ async function executeMCPComms(task) {
     };
   } catch (err) {
     console.error(`[COMMS] ❌ WhatsApp send failed: ${err.message}`);
+    waClient = null; // Clear stale cache in case Docker restarted
     throw new Error(`WhatsApp send failed: ${err.message}`);
   }
 }

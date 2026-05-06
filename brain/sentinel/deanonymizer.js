@@ -1,7 +1,7 @@
 function deanonymize(contractString, reverseMap) {
   let restored = contractString;
   for (const [placeholder, realValue] of Object.entries(reverseMap)) {
-    const regex = new RegExp(placeholder, 'g');
+    const regex = new RegExp(placeholder, 'gi');
     restored = restored.replace(regex, realValue);
   }
   return restored;

@@ -22,10 +22,8 @@ ROUTING RULES:
 
 OUTPUT FORMAT (return exactly this structure):
 {
-  "intent_class": "routine_task|complex_personal|introspective|ambiguous",
-  "sensitive_entities": [
-    {"token": "the exact word found", "type": "PERSON|LOCATION|FINANCIAL|HEALTH|PASSWORD", "placeholder": "PERSON_A"}
-  ],
+  "intent_class": "routine_task", // Choose EXACTLY ONE intent class. Do NOT copy all options.
+  "sensitive_entities": [], // MUST BE EMPTY if no sensitive info is found. Otherwise: [{"token": "John", "type": "PERSON", "placeholder": "PERSON_A"}]
   "memory_keys": ["CONTACTS", "ROUTINES", "FINANCE_LIMITS", "PATTERNS", "RECENT_30D"],
   "routing_decision": "groq",
   "confidence": 0-100,
