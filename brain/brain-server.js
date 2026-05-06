@@ -46,7 +46,19 @@ app.post('/think', async (req, res) => {
       contract.approval_reason = soulCheck.reason;
     }
 
-    res.json({ contract });
+    // Return enriched response with top-level telemetry for the Voice layer
+    res.json({
+      type: 'contract',
+      contract,
+      routing_metadata: contract.routing_metadata || {},
+      sentinel: {
+        intent_class: sentinelResult.classification.intent_class,
+        routing_decision: sentinelResult.classification.routing_decision,
+        confidence: sentinelResult.classification.confidence,
+        sensitive_entities: sentinelResult.classification.sensitive_entities || [],
+        anonymization_applied: sentinelResult.routing === 'groq' && (sentinelResult.classification.sensitive_entities || []).length > 0
+      }
+    });
 
   } catch (err) {
     console.error('Brain error:', err);

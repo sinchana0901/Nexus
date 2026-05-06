@@ -4,6 +4,17 @@
 
 ---
 
+## CONTACTS DIRECTORY
+| Name | Phone (WhatsApp) | Relationship |
+|------|-------------------|--------------|
+| Pranav Mane | 918660573165 | Weekly sync partner, boss |
+| Sinchana Jeppu | 918971542999 | Dev partner, NEXUS co-builder |
+| Sinchana | 918971542999 | Dev partner, NEXUS co-builder |
+| Prajwal | 918660573165 | Product team |
+| Prajjwal | 918660573165 | Product team |
+
+---
+
 ## PEOPLE
 
 ### Pranav Mane

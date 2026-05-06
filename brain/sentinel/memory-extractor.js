@@ -2,10 +2,11 @@ const fs = require('fs');
 const path = require('path');
 
 const SECTION_KEYWORDS = {
-  'CONTACTS': ['rahul', 'sinchana', 'brother', 'prajwal', 'raghav', 'person', 'meet', 'sync', 'call', 'PERSON_'],
-  'ROUTINES':  ['coffee', 'morning', 'gym', 'commute', 'order', 'usual', 'route', 'traffic', 'LOCATION_'],
+  'CONTACTS DIRECTORY': ['text', 'message', 'tell', 'notify', 'send', 'whatsapp', 'call', 'boss', 'contact', 'phone', 'late', 'PERSON_'],
+  'CONTACTS': ['rahul', 'sinchana', 'prajwal', 'pranav', 'raghav', 'person', 'meet', 'sync', 'text', 'message', 'tell', 'notify', 'PERSON_'],
+  'ROUTINES':  ['coffee', 'morning', 'gym', 'commute', 'order', 'usual', 'route', 'traffic', 'food', 'biryani', 'meghana', 'LOCATION_'],
   'FINANCE_LIMITS': ['money', 'pay', 'cost', 'buy', 'order', 'spend', '₹', 'FINANCIAL_'],
-  'PATTERNS': ['late', 'tired', 'usually', 'often', 'pattern'],
+  'PATTERNS': ['late', 'tired', 'usually', 'often', 'pattern', 'running late'],
   'RECENT_30D': ['recently', 'last time', 'before', 'yesterday']
 };
 

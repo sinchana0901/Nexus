@@ -31,7 +31,7 @@ async function executeTask(task, client) {
     // Call the OpenClaw MCP Server
     const response = await Promise.race([
       client.callTool({ name: toolName, arguments: { task } }),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('MCP Worker timeout (5s)')), 5000))
+      new Promise((_, reject) => setTimeout(() => reject(new Error('MCP Worker timeout (60s)')), 60000))
     ]);
 
     if (response.isError) throw new Error(response.content[0].text);

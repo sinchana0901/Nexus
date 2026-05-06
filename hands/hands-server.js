@@ -36,7 +36,7 @@ app.get('/health', (req, res) => res.json({
   status: 'hands online', 
   mode: process.env.DEMO_MODE === 'true' ? 'DEMO' : 'LIVE',
   uptime_seconds: process.uptime(),
-  workers: ['comms', 'calendar', 'geo', 'finance']
+  workers: ['comms', 'calendar', 'geo', 'finance', 'google']
 }));
 
 app.listen(process.env.HANDS_PORT || 3002, () => {

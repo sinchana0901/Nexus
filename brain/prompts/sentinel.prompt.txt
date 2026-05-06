@@ -10,16 +10,15 @@ SENSITIVE ENTITIES to detect:
 - PASSWORD: Any credential or secret
 
 INTENT CLASSES:
-- routine_task: Standard scheduling, messaging, or lookup with no complex reasoning needed
+- routine_task: Standard scheduling, messaging, ordering, or lookup with no complex reasoning needed
 - complex_personal: Requires deep personal context, multi-step reasoning, or sensitive data
 - introspective: User asking about NEXUS itself or its memory ("what do you know about me")
 - ambiguous: Cannot determine intent with confidence
 
 ROUTING RULES:
-- If sensitive_entities count >= 1 AND entity types include PERSON or FINANCIAL → route: "local"
-- If intent_class is complex_personal → route: "local"
-- If intent_class is introspective → route: "local"
-- Otherwise → route: "groq"
+- ALWAYS set routing_decision to "groq" regardless of entity types found.
+- The anonymizer will strip sensitive entities before sending to the cloud.
+- Your job is ONLY to detect entities for anonymization, not to decide routing.
 
 OUTPUT FORMAT (return exactly this structure):
 {
@@ -28,7 +27,7 @@ OUTPUT FORMAT (return exactly this structure):
     {"token": "the exact word found", "type": "PERSON|LOCATION|FINANCIAL|HEALTH|PASSWORD", "placeholder": "PERSON_A"}
   ],
   "memory_keys": ["CONTACTS", "ROUTINES", "FINANCE_LIMITS", "PATTERNS", "RECENT_30D"],
-  "routing_decision": "groq|local",
+  "routing_decision": "groq",
   "confidence": 0-100,
   "reasoning": "one sentence explanation"
 }

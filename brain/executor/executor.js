@@ -16,23 +16,23 @@ async function runExecutor(sentinelResult, userInput) {
 
   let inferenceResult;
 
-  if (routing === 'local') {
-    inferenceResult = await runLocalInference(userInput, relevantMemory);
-  } else {
-    inferenceResult = await runCloudInference(anonymizedInput, anonymizedMemory);
-  }
+  // ALWAYS use Groq (cloud) for contract generation.
+  // Ollama is too slow and produces unreliable contracts.
+  // The anonymizer has already stripped PII from the input.
+  console.log('⚡ Forcing Groq (cloud) inference for contract generation...');
+  inferenceResult = await runCloudInference(anonymizedInput, anonymizedMemory);
 
   
   let cleaned = stripMarkdownFences(inferenceResult.raw);
   
-  // 🧹 THE JANITOR: If the 8B model mashes nodes like "comms|finance", force it to just take the first one.
+  // 🧹 THE JANITOR: If the model mashes nodes like "comms|finance", force it to just take the first one.
   cleaned = cleaned.replace(/"node"\s*:\s*"([a-z]+)\|[a-z|]+"/g, '"node": "$1"');
+  
+  let contract;
   try {
     const parsed = JSON.parse(cleaned);
-    // Deanonymize if Groq was used
-    const contractString = routing === 'groq'
-      ? deanonymize(JSON.stringify(parsed), reverseMap)
-      : JSON.stringify(parsed);
+    // Deanonymize: restore real names from placeholders
+    const contractString = deanonymize(JSON.stringify(parsed), reverseMap);
     contract = JSON.parse(contractString);
   } catch (err) {
     throw new Error(`Contract parse failed: ${err.message} | Raw: ${cleaned.substring(0, 200)}`);
@@ -43,21 +43,25 @@ async function runExecutor(sentinelResult, userInput) {
   contract.timestamp = new Date().toISOString();
   contract.trigger = userInput;
   contract.routing_metadata = {
-    sentinel_decision: routing,
+    sentinel_decision: 'groq',
     inference_used: inferenceResult.source,
     sensitive_entities_found: classification.sensitive_entities.length,
-    anonymization_applied: routing === 'groq' && classification.sensitive_entities.length > 0,
+    anonymization_applied: classification.sensitive_entities.length > 0,
     sentinel_latency_ms: classification.sentinel_latency_ms,
     executor_latency_ms: inferenceResult.latency
   };
 
-  // Ensure task IDs
+  // Ensure task IDs and inject trigger for deanonymization recovery
   if (contract.tasks) {
-    contract.tasks = contract.tasks.map(t => ({ ...t, task_id: t.task_id || uuidv4() }));
+    contract.tasks = contract.tasks.map(t => ({
+      ...t,
+      task_id: t.task_id || uuidv4(),
+      trigger: userInput  // original user input for anonymized placeholder recovery
+    }));
   }
 
   // Validate
-const validation = validateContract(contract);
+  const validation = validateContract(contract);
   if (!validation.valid) {
     console.warn('\n⚠️  SCHEMA VIOLATION DETECTED');
     console.warn(`❌ Errors: ${validation.errors.join(', ')}`);

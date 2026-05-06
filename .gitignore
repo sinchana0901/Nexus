@@ -143,3 +143,6 @@ vite.config.ts.timestamp-*
 .vite/
 
 mcp-servers/
+# OAuth Credentials
+*credentials.json
+*token.json

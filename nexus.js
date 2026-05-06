@@ -1,4 +1,4 @@
-const axios = require('axios');
+﻿const axios = require('axios');
 const readline = require('readline');
 require('dotenv').config();
 
@@ -29,40 +29,78 @@ async function nexus(userInput) {
     }
     
     // Step 3: Hands Execute
-    console.log('\n🖐️  Hands executing swarm...\n');
-    console.log("🖐️ Hands executing swarm...");
+    console.log('\\n🖐️  Hands executing swarm...\\n');
 
-// ==========================================
-// 🚀 REAL-WORLD MCP SWARM INJECTION 
-// ==========================================
-async function runSwarmAction() {
-    try {
-        // 1. Load the MCP bridge dynamically (Note the updated path!)
-        const mcpBridge = await import('./brain/mcp-client.mjs');
-        
-        // 2. Connect to the Hands
-        const { tools } = await mcpBridge.connectToMCP();
-        
-        // 3. NEW TEST: Let's trigger the actual Food Automator!
-        console.log("🤖 Triggering the Zomato Automator Tool...");
-        const result = await mcpBridge.executeTool('order_food', { 
-            dishName: 'dum biryani' 
-        });
-        
-        console.log("✅ Result from Hands:", result);
-    } catch (error) {
-        console.error("🔥 Swarm execution failed:", error);
+    // ==========================================
+    // 🚀 REAL-WORLD MCP SWARM INJECTION 
+    // ==========================================
+    async function runSwarmAction(contract) {
+        try {
+            console.log("\\n[NEXUS] Contract Tasks Breakdown:");
+            console.log(JSON.stringify(contract.tasks, null, 2));
+
+            // 1. Load the MCP bridge dynamically
+            const mcpBridge = await import('./brain/mcp-client.mjs');
+            
+            // 2. Connect to the Hands
+            const { tools } = await mcpBridge.connectToMCP();
+            
+            for (const task of contract.tasks) {
+                console.log(`\n===================================`);
+                console.log(`🚀 Executing Task Node: ${task.node} | Action: ${task.action}`);
+
+                if (task.node === 'comms' || task.action.includes('WhatsApp') || (task.payload && task.payload.message)) {
+                    console.log("🟢 Routing to WhatsApp MCP...");
+                    try {
+                        const recipient = task.payload.contact_id || task.payload.recipient || "918660573165";
+                        let message = task.payload.message || task.payload.content || "Hello from NEXUS!";
+                        
+                        if (recipient === "8660573165" || recipient === "+918660573165" || recipient.includes("8660573165")) {
+                            message = message + " [Sent via NEXUS Auto-Routing]";
+                        }
+
+                        let formatRecipient = String(recipient).replace(/\\D/g, '');
+                        if (formatRecipient.length === 10) formatRecipient = "91" + formatRecipient;
+                        else if (!formatRecipient.startsWith("91")) formatRecipient = "91" + formatRecipient.slice(-10);
+
+                        const waResult = await mcpBridge.executeTool('send_message', { 
+                            recipient: formatRecipient,
+                            message: message
+                        });
+                        console.log("✅ Result from WhatsApp:", waResult);
+                    } catch (waErr) {
+                        console.error("🔥 WhatsApp tool failed:", waErr.message);
+                    }
+                } else if (task.node === 'geo' || task.node === 'finance' || task.action.includes('Order') || task.action.includes('Zomato') || (task.payload && (task.payload.item || task.payload.query || task.payload.amount))) {
+                    console.log("🤖 Routing to Zomato Automator...");
+                    try {
+                        // Extract dish dynamically from the payload (or default to dum biryani if unspecified)
+                        const dish = task.payload.item || task.payload.query || task.payload.dishName || 'dum biryani';
+                        const result = await mcpBridge.executeTool('order_food', { 
+                            dishName: dish 
+                        });
+                        console.log("✅ Result from Zomato:", result);
+                    } catch (err) {
+                        console.error("🔥 Zomato tool failed:", err.message);
+                    }
+                } else {
+                     console.log("⚠️ Unknown task routing. Payload:", task.payload);
+                }
+            }
+        } catch (error) {
+            console.error("🔥 Swarm execution failed:", error);
+        }
     }
-}
 
-// Call the test function
-runSwarmAction();
-// ==========================================
+    // Call the test function
+    await runSwarmAction(contract);
+    // ==========================================
+    
+    // Original hands endpoint trigger (Silent room handling)
     await axios.post(`${HANDS_URL}/execute`, { contract });
-    // The visual output will primarily be handled by the Hands server's Silent Room
     
   } catch (err) {
-    console.error('\n🔥 System Error:', err.response?.data?.error || err.message);
+    console.error('\\n🔥 System Error:', err.response?.data?.error || err.message);
     if (err.response?.data?.details) {
       console.error('Details:', err.response.data.details);
     }
@@ -81,9 +119,9 @@ async function askUserApproval() {
 
 // Interactive REPL Setup
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-console.log('\n╔════════════════════════════════════╗');
+console.log('\\n╔════════════════════════════════════╗');
 console.log('║        N E X U S   L I V E         ║');
-console.log('╚════════════════════════════════════╝\n');
+console.log('╚════════════════════════════════════╝\\n');
 
 const promptUser = () => {
   rl.question('> ', async (line) => {

@@ -2,6 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "NEXUS Hybrid Task Contract v2",
   "type": "object",
+  "additionalProperties": true,
   "required": [
     "session_id", "timestamp", "trigger",
     "routing_metadata", "tasks",
@@ -50,9 +51,11 @@
       }
     },
 
+    "narrative_response": { "type": "string", "description": "Spoken response for conversational/introspective queries" },
+
     "tasks": {
       "type": "array",
-      "minItems": 1,
+      "minItems": 0,
       "items": {
         "type": "object",
         "required": ["task_id", "node", "action", "payload", "priority"],
@@ -60,7 +63,7 @@
           "task_id": { "type": "string" },
           "node": {
             "type": "string",
-            "enum": ["comms", "calendar", "finance", "geo", "system"]
+            "enum": ["comms", "calendar", "finance", "geo", "google", "system"]
           },
           "action": { "type": "string" },
           "payload": { "type": "object" },
